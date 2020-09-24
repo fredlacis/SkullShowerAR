@@ -22,6 +22,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         configureScene()
         
+        // Add Coaching View
+        overlayCoachingView()
+        
+        // Gestures
+        let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(panGesture:)))
+        let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(tapGesture:)))
+        sceneView.addGestureRecognizer(panRecognizer)
+        sceneView.addGestureRecognizer(tapRecognizer)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -47,12 +56,96 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         configuration.environmentTexturing = .automatic
         configuration.isLightEstimationEnabled = true
         sceneView.session.run(configuration)
+        sceneView.autoenablesDefaultLighting = true
         
         // Debug Options
         sceneView.showsStatistics = true // Show statistics such as fps and timing information
-        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin, ARSCNDebugOptions.showPhysicsShapes]
-        sceneView.autoenablesDefaultLighting = true
+//        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin, ARSCNDebugOptions.showPhysicsShapes]
         
+        
+    }
+    
+    // ARCoachingOverlayView configuration
+    func overlayCoachingView() {
+        let coachingView = ARCoachingOverlayView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height))
+        coachingView.session = sceneView.session
+        coachingView.activatesAutomatically = true
+        coachingView.goal = .horizontalPlane
+        
+        sceneView.addSubview(coachingView)
+    }
+    
+    @objc func handleTap(tapGesture: UITapGestureRecognizer){
+//        guard let touch = touches.first else { return }
+        let point = tapGesture.location(in: sceneView)
+        
+        if let query = sceneView.raycastQuery(from: point, allowing: .existingPlaneGeometry, alignment: .horizontal) {
+            let result = sceneView.session.raycast(query)
+        
+            guard let raycast: ARRaycastResult = result.first else {return}
+            
+            insertSkull(for: raycast)
+        }
+    }
+
+    func deg2rad(_ number: CGFloat) -> Double {
+        return Double(number * .pi / 180)
+    }
+    
+    var lastPanLocation: CGPoint?
+    var panningCharacter = false
+    @objc func handlePan(panGesture: UIPanGestureRecognizer) {
+        switch panGesture.state {
+            case .began:
+                let location = panGesture.location(in: self.sceneView)
+                let results = sceneView.hitTest(location)
+                if let result = results.first {
+                    self.character?.enumerateHierarchy { (node, _) in
+                        if result.node == node {
+                            panningCharacter = true
+                        }
+                    }
+                }
+            case .changed:
+                if panningCharacter {
+                    
+                    let translation = panGesture.translation(in: panGesture.view!)
+                    let x = Float(translation.x)
+                    let y = Float(-translation.y)
+                    
+                    let anglePan = sqrt(pow(x,2) + pow(y,2)) * .pi / 180.0
+                        
+                    var rotationVector = SCNVector4()
+                        rotationVector.x = -y
+                        rotationVector.y = x
+                        rotationVector.z = 0
+                        rotationVector.w = anglePan
+                    
+                    self.character!.rotation = rotationVector
+                    
+                }
+            case .ended:
+                panningCharacter = false
+                
+                let currentPivot = self.character!.pivot
+                let currentPosition = self.character!.position
+                let changePivot = SCNMatrix4Invert(SCNMatrix4MakeRotation(self.character!.rotation.w, self.character!.rotation.x, self.character!.rotation.y, self.character!.rotation.z))
+                
+                self.character!.pivot = SCNMatrix4Mult(changePivot, currentPivot)
+                self.character!.transform = SCNMatrix4Identity
+                self.character!.position = currentPosition
+                
+            default:
+                break
+        }
+    }
+    
+    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
+        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
+    }
+
+    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
+        return sqrt(CGPointDistanceSquared(from: from, to: to))
     }
         
     func insertSkull(for result: ARRaycastResult) {
@@ -75,18 +168,18 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     // Intercept a touch on screen and hit-test against a plane surface
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let point = touch.location(in: sceneView)
-        
-        if let query = sceneView.raycastQuery(from: point, allowing: .existingPlaneGeometry, alignment: .horizontal) {
-            let result = sceneView.session.raycast(query)
-        
-            guard let raycast: ARRaycastResult = result.first else {return}
-            
-            insertSkull(for: raycast)
-        }
-    }
+//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        guard let touch = touches.first else { return }
+//        let point = touch.location(in: sceneView)
+//
+//        if let query = sceneView.raycastQuery(from: point, allowing: .existingPlaneGeometry, alignment: .horizontal) {
+//            let result = sceneView.session.raycast(query)
+//
+//            guard let raycast: ARRaycastResult = result.first else {return}
+//
+//            insertSkull(for: raycast)
+//        }
+//    }
     
     // MARK: - Renderer functions
     
