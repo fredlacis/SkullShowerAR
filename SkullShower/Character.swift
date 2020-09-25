@@ -22,8 +22,16 @@ class Character: SCNNode {
                 node.geometry?.materials.first?.metalness.contents = UIImage(named: "broken_down_concrete2_Metallic")
                 node.geometry?.materials.first?.ambientOcclusion.contents = UIImage(named: "broken_down_concrete2_ao")
                 node.geometry?.materials.first?.normal.contents = UIImage(named: "broken_down_concrete2_Normal")
+                
+                
+                if let nodeGeometry = node.geometry {
+                    let nodeShape = SCNPhysicsShape(geometry: nodeGeometry, options: [SCNPhysicsShape.Option.scale : SCNVector3(0.1,0.1,0.1)])
+                    node.physicsBody = SCNPhysicsBody(type: .kinematic, shape: nodeShape)
+                }
+                
             }
             
+            characterNode.movabilityHint = .fixed
             self.addChildNode(characterNode)
         }
         

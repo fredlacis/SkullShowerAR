@@ -16,6 +16,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var planes = [ARPlaneAnchor: Plane]()
     
     var character: Character?
+    var emitter: ShapeEmitter?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,7 +62,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Debug Options
         sceneView.showsStatistics = true // Show statistics such as fps and timing information
 //        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin, ARSCNDebugOptions.showPhysicsShapes]
-        
+        self.sceneView.rendersMotionBlur = true
         
     }
     
@@ -76,7 +77,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     @objc func handleTap(tapGesture: UITapGestureRecognizer){
-//        guard let touch = touches.first else { return }
         let point = tapGesture.location(in: sceneView)
         
         if let query = sceneView.raycastQuery(from: point, allowing: .existingPlaneGeometry, alignment: .horizontal) {
@@ -86,10 +86,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             
             insertSkull(for: raycast)
         }
-    }
-
-    func deg2rad(_ number: CGFloat) -> Double {
-        return Double(number * .pi / 180)
     }
     
     var lastPanLocation: CGPoint?
@@ -139,14 +135,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 break
         }
     }
-    
-    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
-        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
-    }
-
-    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
-        return sqrt(CGPointDistanceSquared(from: from, to: to))
-    }
         
     func insertSkull(for result: ARRaycastResult) {
         
@@ -154,6 +142,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.character = Character("Skull")
             sceneView.scene.rootNode.addChildNode(self.character!)
         }
+        
+        if self.emitter == nil {
+            self.emitter = ShapeEmitter(emissionView: self.sceneView)
+            sceneView.scene.rootNode.addChildNode(self.emitter!)
+        }
+        
+        self.emitter!.position = SCNVector3(
+            result.worldTransform.columns.3.x,
+            result.worldTransform.columns.3.y + 0.6,
+            result.worldTransform.columns.3.z
+            )
+        
+        self.emitter!.emit()
         
         self.character!.position = SCNVector3(
             result.worldTransform.columns.3.x,

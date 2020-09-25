@@ -21,6 +21,8 @@ class Plane: SCNNode {
     self.anchor = anchor
     super.init()
     
+    self.movabilityHint = .fixed
+    
     // init geometry
     self.geometry = SCNBox(width: CGFloat(anchor.extent.x), height: height, length: CGFloat(anchor.extent.z), chamferRadius: 0.0)
     self.geometry?.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.5)
@@ -37,6 +39,8 @@ class Plane: SCNNode {
     
     // disable shadow for planes
     self.castsShadow = false
+    
+    self.hide()
   }
   
   required init?(coder aDecoder: NSCoder) {
