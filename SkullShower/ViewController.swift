@@ -9,7 +9,9 @@ import UIKit
 import SceneKit
 import ARKit
 
-class ViewController: UIViewController, ARSCNViewDelegate {
+
+// MARK: - SetUp
+class ViewController: UIViewController {
 
     @IBOutlet var sceneView: ARSCNView!
     
@@ -17,21 +19,52 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var character: Character?
     var emitter: ShapeEmitter?
+    var panningCharacter = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureScene()
+        setUpScene()
+        setUpOverlayCoachingView()
+        setUpGestureRecognizers()
         
-        // Add Coaching View
-        overlayCoachingView()
+    }
+    
+    func setUpScene() {
+        // Set the view's delegate
+        sceneView.delegate = self
+        sceneView.scene.physicsWorld.contactDelegate = self
         
-        // Gestures
+        // Configurations
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = .horizontal
+        configuration.environmentTexturing = .automatic
+        configuration.isLightEstimationEnabled = true
+        sceneView.session.run(configuration)
+        sceneView.autoenablesDefaultLighting = true
+        self.sceneView.rendersMotionBlur = true
+        
+        #if DEBUG
+        sceneView.showsStatistics = true // Show statistics such as fps and timing information
+//        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin, ARSCNDebugOptions.showPhysicsShapes]
+        #endif
+        
+    }
+    
+    func setUpOverlayCoachingView() {
+        let coachingView = ARCoachingOverlayView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height))
+        coachingView.session = sceneView.session
+        coachingView.activatesAutomatically = true
+        coachingView.goal = .horizontalPlane
+        
+        sceneView.addSubview(coachingView)
+    }
+    
+    func setUpGestureRecognizers(){
         let panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePan(panGesture:)))
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(tapGesture:)))
         sceneView.addGestureRecognizer(panRecognizer)
         sceneView.addGestureRecognizer(tapRecognizer)
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -41,41 +74,19 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
+
         // Pause the view's session
         sceneView.session.pause()
     }
     
-    // Scene configuration and Debug options
-    func configureScene() {
-        // Set the view's delegate
-        sceneView.delegate = self
-        
-        // Configurations
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = .horizontal
-        configuration.environmentTexturing = .automatic
-        configuration.isLightEstimationEnabled = true
-        sceneView.session.run(configuration)
-        sceneView.autoenablesDefaultLighting = true
-        
-        // Debug Options
-        sceneView.showsStatistics = true // Show statistics such as fps and timing information
-//        sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints, ARSCNDebugOptions.showWorldOrigin, ARSCNDebugOptions.showPhysicsShapes]
-        self.sceneView.rendersMotionBlur = true
-        
-    }
+//    var floatArray: [Float] = [0, 30, 60, 90]
+//    var index = 0
+//    var initialTouchRotation = SCNVector4()
     
-    // ARCoachingOverlayView configuration
-    func overlayCoachingView() {
-        let coachingView = ARCoachingOverlayView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height))
-        coachingView.session = sceneView.session
-        coachingView.activatesAutomatically = true
-        coachingView.goal = .horizontalPlane
-        
-        sceneView.addSubview(coachingView)
-    }
-    
+}
+
+// MARK: - Gesture Handlers
+extension ViewController {
     @objc func handleTap(tapGesture: UITapGestureRecognizer){
         let point = tapGesture.location(in: sceneView)
         
@@ -88,8 +99,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    var lastPanLocation: CGPoint?
-    var panningCharacter = false
     @objc func handlePan(panGesture: UIPanGestureRecognizer) {
         switch panGesture.state {
             case .began:
@@ -99,6 +108,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     self.character?.enumerateHierarchy { (node, _) in
                         if result.node == node {
                             panningCharacter = true
+//                            initialTouchRotation = self.character!.rotation
                         }
                     }
                 }
@@ -117,25 +127,45 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                         rotationVector.z = 0
                         rotationVector.w = anglePan
                     
+//                    self.character!.rotation.x = initialTouchRotation.x + rotationVector.x
+//                    self.character!.rotation.y = initialTouchRotation.y + rotationVector.y
+//                    self.character!.rotation.z = initialTouchRotation.z + rotationVector.z
+//                    self.character!.rotation.w = initialTouchRotation.w + rotationVector.w
+//                    print(self.character!.rotation)
                     self.character!.rotation = rotationVector
+                    self.character!.anglesEuler = self.character!.eulerAngles
+                    self.character!.anglesRotation = self.character!.rotation
                     
                 }
             case .ended:
                 panningCharacter = false
                 
-                let currentPivot = self.character!.pivot
-                let currentPosition = self.character!.position
-                let changePivot = SCNMatrix4Invert(SCNMatrix4MakeRotation(self.character!.rotation.w, self.character!.rotation.x, self.character!.rotation.y, self.character!.rotation.z))
+                if self.character != nil {
                 
-                self.character!.pivot = SCNMatrix4Mult(changePivot, currentPivot)
-                self.character!.transform = SCNMatrix4Identity
-                self.character!.position = currentPosition
+                    let currentPivot = self.character!.pivot
+                    let currentPosition = self.character!.position
+                    let changePivot = SCNMatrix4Invert(SCNMatrix4MakeRotation(self.character!.rotation.w, self.character!.rotation.x, self.character!.rotation.y, self.character!.rotation.z))
+
+                    self.character!.pivot = SCNMatrix4Mult(changePivot, currentPivot)
+    //                print("Pivot\n", self.character!.pivot.m31.rad2deg, self.character!.pivot.m32.rad2deg, self.character!.pivot.m33.rad2deg, self.character!.pivot.m34.rad2deg)
+    //                self.index += 1
+    //                self.index = self.index % self.floatArray.count
+    //                self.character!.pivot.m41 = floatArray[index].deg2rad
+    //                self.character!.pivot.m42 = 0
+    //                self.character!.pivot.m43 = 0
+    //                self.character!.pivot.m44 = 0
+    //                self.character!.pivot.
+    //                print(floatArray[index])
+
+                    self.character!.transform = SCNMatrix4Identity
+                    self.character!.position = currentPosition
+                }
                 
             default:
                 break
         }
     }
-        
+    
     func insertSkull(for result: ARRaycastResult) {
         
         if self.character == nil {
@@ -150,7 +180,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         self.emitter!.position = SCNVector3(
             result.worldTransform.columns.3.x,
-            result.worldTransform.columns.3.y + 0.6,
+            result.worldTransform.columns.3.y + 1.2,
             result.worldTransform.columns.3.z
             )
         
@@ -166,23 +196,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             self.character!.look(at: cameraPosition.position)
         }
         
+        self.character!.anglesEuler = self.character!.eulerAngles
+        self.character!.anglesRotation = self.character!.rotation
+    }
+}
+
+// MARK: - SCNPhysicsContactDelegate
+extension ViewController: SCNPhysicsContactDelegate {
+    
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        
+        guard let rainDrop = (contact.nodeA as? RainDrop) ?? (contact.nodeB as? RainDrop) else { return }    
+        rainDrop.hide()
+        
     }
     
-    // Intercept a touch on screen and hit-test against a plane surface
-//    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        guard let touch = touches.first else { return }
-//        let point = touch.location(in: sceneView)
-//
-//        if let query = sceneView.raycastQuery(from: point, allowing: .existingPlaneGeometry, alignment: .horizontal) {
-//            let result = sceneView.session.raycast(query)
-//
-//            guard let raycast: ARRaycastResult = result.first else {return}
-//
-//            insertSkull(for: raycast)
-//        }
-//    }
-    
-    // MARK: - Renderer functions
+}
+
+// MARK: - ARSCNViewDelegate
+extension ViewController: ARSCNViewDelegate {
     
     // Update lighting intensity
     func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
@@ -205,4 +237,5 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             updatedPlane.update(anchor)
         }
     }
+    
 }
