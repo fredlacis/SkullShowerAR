@@ -45,10 +45,10 @@ class Character: SCNNode, AVAudioPlayerDelegate {
 
             characterNode.enumerateHierarchy { (node, _) in
                 node.geometry?.materials.first?.lightingModel = .physicallyBased
-                node.geometry?.materials.first?.roughness.contents = UIImage(named: "broken_down_concrete2_Roughness")
-                node.geometry?.materials.first?.metalness.contents = UIImage(named: "broken_down_concrete2_Metallic")
-                node.geometry?.materials.first?.ambientOcclusion.contents = UIImage(named: "broken_down_concrete2_ao")
-                node.geometry?.materials.first?.normal.contents = UIImage(named: "broken_down_concrete2_Normal")
+                node.geometry?.materials.first?.roughness.contents = UIImage(named: "BrokenConcrete_Roughness")
+                node.geometry?.materials.first?.metalness.contents = UIImage(named: "BrokenConcrete_Metallic")
+                node.geometry?.materials.first?.ambientOcclusion.contents = UIImage(named: "BrokenConcrete_AmbientOclusion")
+                node.geometry?.materials.first?.normal.contents = UIImage(named: "BrokenConcrete_Normal")
                 
                 
                 if let nodeGeometry = node.geometry {
@@ -75,7 +75,7 @@ class Character: SCNNode, AVAudioPlayerDelegate {
     
     // MARK: - State Checking
     
-    private let stateUpdateInverval = 10.0
+    private let stateUpdateInverval = 5.3
     
     func runIntroduction() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 7) {
@@ -93,7 +93,7 @@ class Character: SCNNode, AVAudioPlayerDelegate {
     
     @objc func updateState() {
         
-        startSpeaking("Speak\(Int.random(in: 1...6))")
+        startSpeaking("Speak\(Int.random(in: 1...17))")
         
     }
     

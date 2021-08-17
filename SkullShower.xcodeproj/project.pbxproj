@@ -68,11 +68,11 @@
 		D4B2F63D251AF2C80037BED1 /* SkullShower */ = {
 			isa = PBXGroup;
 			children = (
-				D4B2F63E251AF2C80037BED1 /* AppDelegate.swift */,
-				D44CE04A251E99E3005DFB46 /* Extensions.swift */,
 				D4B2F642251AF2C80037BED1 /* ViewController.swift */,
-				D42F045B25238235003EDA89 /* BitMaskCategory.swift */,
 				D4D117C52523A01900E1A23D /* SCNElements */,
+				D44CE04A251E99E3005DFB46 /* Extensions.swift */,
+				D42F045B25238235003EDA89 /* BitMaskCategory.swift */,
+				D4B2F63E251AF2C80037BED1 /* AppDelegate.swift */,
 				D4B2F644251AF2C80037BED1 /* Main.storyboard */,
 				D4B2F649251AF2CA0037BED1 /* LaunchScreen.storyboard */,
 				D4B2F640251AF2C80037BED1 /* art.scnassets */,

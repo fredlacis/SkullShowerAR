@@ -21,12 +21,13 @@ class RainDrop: SCNNode {
             }
         }
         rainDropGeometry?.materials.first?.diffuse.contents = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5)
+//        rainDropGeometry?.materials.first?.diffuse.contents = UIColor(red: 0.65, green: 0.9, blue: 1, alpha: 0.8)
         rainDropGeometry?.materials.first?.roughness.contents = 0.0
         rainDropGeometry?.materials.first?.metalness.contents = 1.0
         
         let yScale = Float.random(in: 0.3...0.6)
         
-        let physicsShape = SCNPhysicsShape(geometry: rainDropGeometry!, options: [SCNPhysicsShape.Option.scale : SCNVector3(0.3,yScale,0.3)])
+        let physicsShape = SCNPhysicsShape(geometry: rainDropGeometry!, options: [SCNPhysicsShape.Option.scale : SCNVector3(0.2,yScale,0.2)])
         let rainDropPhysics = SCNPhysicsBody(type: .dynamic, shape: physicsShape)
         rainDropPhysics.mass = 0.00005
         rainDropPhysics.restitution = 0.0
@@ -37,7 +38,7 @@ class RainDrop: SCNNode {
     
         self.geometry = rainDropGeometry
         self.movabilityHint = .movable
-        self.scale = SCNVector3(0.3,yScale,0.3)
+        self.scale = SCNVector3(0.2,yScale,0.2)
         self.physicsBody = rainDropPhysics
         
     }

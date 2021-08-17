@@ -9,7 +9,6 @@ import UIKit
 import SceneKit
 import ARKit
 
-
 // MARK: - SetUp
 class ViewController: UIViewController {
 
@@ -147,15 +146,6 @@ extension ViewController {
                     let changePivot = SCNMatrix4Invert(SCNMatrix4MakeRotation(self.character!.rotation.w, self.character!.rotation.x, self.character!.rotation.y, self.character!.rotation.z))
 
                     self.character!.pivot = SCNMatrix4Mult(changePivot, currentPivot)
-    //                print("Pivot\n", self.character!.pivot.m31.rad2deg, self.character!.pivot.m32.rad2deg, self.character!.pivot.m33.rad2deg, self.character!.pivot.m34.rad2deg)
-    //                self.index += 1
-    //                self.index = self.index % self.floatArray.count
-    //                self.character!.pivot.m41 = floatArray[index].deg2rad
-    //                self.character!.pivot.m42 = 0
-    //                self.character!.pivot.m43 = 0
-    //                self.character!.pivot.m44 = 0
-    //                self.character!.pivot.
-    //                print(floatArray[index])
 
                     self.character!.transform = SCNMatrix4Identity
                     self.character!.position = currentPosition

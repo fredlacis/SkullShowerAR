@@ -16,22 +16,29 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kty-18-GxJ">
-                                <rect key="frame" x="184" y="433" width="46" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                            </button>
-                            <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BrB-h1-WRS">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rpw-ea-NZt" userLabel="ContentView">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                            </arscnView>
+                                <subviews>
+                                    <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BrB-h1-WRS">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                    </arscnView>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="BrB-h1-WRS" secondAttribute="trailing" id="OHm-eZ-kAT"/>
+                                    <constraint firstItem="BrB-h1-WRS" firstAttribute="top" secondItem="rpw-ea-NZt" secondAttribute="top" id="Sye-n6-gj8"/>
+                                    <constraint firstAttribute="bottom" secondItem="BrB-h1-WRS" secondAttribute="bottom" id="VD1-fd-tXp"/>
+                                    <constraint firstItem="BrB-h1-WRS" firstAttribute="leading" secondItem="rpw-ea-NZt" secondAttribute="leading" id="yiE-Ti-W4f"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="fQZ-KI-GVf"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="BrB-h1-WRS" secondAttribute="trailing" id="0wz-Eu-yiG"/>
-                            <constraint firstAttribute="bottom" secondItem="BrB-h1-WRS" secondAttribute="bottom" id="8WK-qL-D6B"/>
-                            <constraint firstItem="BrB-h1-WRS" firstAttribute="leading" secondItem="U0K-SW-4ec" secondAttribute="leading" id="9kW-jq-OCo"/>
-                            <constraint firstItem="BrB-h1-WRS" firstAttribute="top" secondItem="U0K-SW-4ec" secondAttribute="top" id="rJc-2c-zQA"/>
+                            <constraint firstItem="fQZ-KI-GVf" firstAttribute="trailing" secondItem="rpw-ea-NZt" secondAttribute="trailing" id="MLJ-vs-ipW"/>
+                            <constraint firstItem="rpw-ea-NZt" firstAttribute="top" secondItem="U0K-SW-4ec" secondAttribute="top" id="az1-iy-wr5"/>
+                            <constraint firstAttribute="bottom" secondItem="rpw-ea-NZt" secondAttribute="bottom" id="ltn-Nw-SOy"/>
+                            <constraint firstItem="rpw-ea-NZt" firstAttribute="leading" secondItem="fQZ-KI-GVf" secondAttribute="leading" id="tK2-eE-xEi"/>
                         </constraints>
                     </view>
                     <connections>
